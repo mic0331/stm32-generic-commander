@@ -29,127 +29,145 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
+#include <string.h>
 
+#include "stm32f4xx_hal.h"
+
+extern UART_HandleTypeDef huart2;
 
 /* Variables */
-extern int __io_putchar(int ch) __attribute__((weak));
-extern int __io_getchar(void) __attribute__((weak));
+// extern int __io_putchar(int ch) __attribute__((weak));
+// extern int __io_getchar(void) __attribute__((weak));
+__attribute__((weak)) int __io_putchar(int ch) {
+	HAL_StatusTypeDef status = HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1,
+			0xFFFF);
+	return (status == HAL_OK ? ch : 0);
+}
 
+__attribute__((weak)) int __io_getchar(void) {
+
+	//char data[4];
+	uint8_t ch, len = 1;
+
+	while (HAL_UART_Receive(&huart2, &ch, len, 10) != HAL_OK) {};
+	/*
+	memset(data, 0x00, 4);
+	switch (ch) {
+	case '\r':
+	case '\n':
+		len = 2;
+		sprintf(data, "\r\n");
+		break;
+
+	case '\b':
+	case 0x7F:
+		len = 3;
+		sprintf(data, "\b \b");
+		break;
+
+	default:
+		data[0] = ch;
+		break;
+	}
+	HAL_UART_Transmit(&huart2, (uint8_t*) data, len, 10);
+	*/
+
+	return ch;
+}
 
 char *__env[1] = { 0 };
 char **environ = __env;
 
-
 /* Functions */
-void initialise_monitor_handles()
-{
+void initialise_monitor_handles() {
 }
 
-int _getpid(void)
-{
+int _getpid(void) {
 	return 1;
 }
 
-int _kill(int pid, int sig)
-{
+int _kill(int pid, int sig) {
 	errno = EINVAL;
 	return -1;
 }
 
-void _exit (int status)
-{
+void _exit(int status) {
 	_kill(status, -1);
-	while (1) {}		/* Make sure we hang here */
+	while (1) {
+	} /* Make sure we hang here */
 }
 
-__attribute__((weak)) int _read(int file, char *ptr, int len)
-{
+__attribute__((weak)) int _read(int file, char *ptr, int len) {
 	int DataIdx;
 
-	for (DataIdx = 0; DataIdx < len; DataIdx++)
-	{
+	for (DataIdx = 0; DataIdx < len; DataIdx++) {
 		*ptr++ = __io_getchar();
 	}
 
-return len;
+	return len;
 }
 
-__attribute__((weak)) int _write(int file, char *ptr, int len)
-{
+__attribute__((weak)) int _write(int file, char *ptr, int len) {
 	int DataIdx;
 
-	for (DataIdx = 0; DataIdx < len; DataIdx++)
-	{
+	for (DataIdx = 0; DataIdx < len; DataIdx++) {
 		__io_putchar(*ptr++);
 	}
 	return len;
 }
 
-int _close(int file)
-{
+int _close(int file) {
 	return -1;
 }
 
-
-int _fstat(int file, struct stat *st)
-{
+int _fstat(int file, struct stat *st) {
 	st->st_mode = S_IFCHR;
 	return 0;
 }
 
-int _isatty(int file)
-{
+int _isatty(int file) {
 	return 1;
 }
 
-int _lseek(int file, int ptr, int dir)
-{
+int _lseek(int file, int ptr, int dir) {
 	return 0;
 }
 
-int _open(char *path, int flags, ...)
-{
+int _open(char *path, int flags, ...) {
 	/* Pretend like we always fail */
 	return -1;
 }
 
-int _wait(int *status)
-{
+int _wait(int *status) {
 	errno = ECHILD;
 	return -1;
 }
 
-int _unlink(char *name)
-{
+int _unlink(char *name) {
 	errno = ENOENT;
 	return -1;
 }
 
-int _times(struct tms *buf)
-{
+int _times(struct tms *buf) {
 	return -1;
 }
 
-int _stat(char *file, struct stat *st)
-{
+int _stat(char *file, struct stat *st) {
 	st->st_mode = S_IFCHR;
 	return 0;
 }
 
-int _link(char *old, char *new)
-{
+int _link(char *old, char *new) {
 	errno = EMLINK;
 	return -1;
 }
 
-int _fork(void)
-{
+int _fork(void) {
 	errno = EAGAIN;
 	return -1;
 }
 
-int _execve(char *name, char **argv, char **env)
-{
+int _execve(char *name, char **argv, char **env) {
 	errno = ENOMEM;
 	return -1;
 }

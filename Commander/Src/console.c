@@ -10,6 +10,8 @@
 #include "consoleIo.h"
 #include "consoleCommands.h"
 
+#include <stdio.h>
+
 #define MIN(X, Y)		(((X) < (Y)) ? (X) : (Y))
 #define NOT_FOUND		-1
 #define INT16_MAX_STR_LENGTH 8 // -65534: six characters plus a two NULLs
@@ -139,6 +141,7 @@ void ConsoleProcess(void)
 	ConsoleIoReceive((uint8_t*)&(mReceiveBuffer[mReceivedSoFar]), ( CONSOLE_COMMAND_MAX_LENGTH - mReceivedSoFar ), &received);
 	if ( received > 0u )
 	{
+		printf("%s\r\n", mReceiveBuffer);
 		mReceivedSoFar += received;
 		cmdEndline = ConsoleCommandEndline(mReceiveBuffer, mReceivedSoFar);
 		if ( cmdEndline >= 0 )  // have complete string, find command

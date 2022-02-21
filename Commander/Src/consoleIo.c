@@ -3,28 +3,6 @@
 
 #include "consoleIo.h"
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
-
-int _read(int file, char *result, size_t len) {
-    HAL_StatusTypeDef status;
-    int retcode = 0;
-
-    if (len != 0) {
-        status = HAL_UART_Receive( &huart2, (uint8_t *) result, len, HAL_MAX_DELAY);
-
-        if (status == HAL_OK) {
-            retcode = len;
-        } else {
-            retcode = -1;
-        }
-    }
-    return( retcode);
-}
-
-int _write(int file, char *ptr, int len) {
-	HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, 100);
-	return len;
-}
 
 eConsoleError ConsoleIoInit(void)
 {
